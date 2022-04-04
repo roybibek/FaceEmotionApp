@@ -1,6 +1,6 @@
 import time
 import math
-import cv2
+import cv2 as cv
 import numpy as np
 import streamlit as st
 import argparse
@@ -20,7 +20,7 @@ def get_face_box(net, frame, conf_threshold=0.7):
     opencv_dnn_frame = frame.copy()
     frame_height = opencv_dnn_frame.shape[0]
     frame_width = opencv_dnn_frame.shape[1]
-    blob_img = cv2.dnn.blobFromImage(opencv_dnn_frame, 1.0, (300, 300), [
+    blob_img = cv.dnn.blobFromImage(opencv_dnn_frame, 1.0, (300, 300), [
         104, 117, 123], True, False)
 
     net.setInput(blob_img)
@@ -34,7 +34,7 @@ def get_face_box(net, frame, conf_threshold=0.7):
             x2 = int(detections[0, 0, i, 5] * frame_width)
             y2 = int(detections[0, 0, i, 6] * frame_height)
             b_boxes_detect.append([x1, y1, x2, y2])
-            cv2.rectangle(opencv_dnn_frame, (x1, y1), (x2, y2),
+            cv.rectangle(opencv_dnn_frame, (x1, y1), (x2, y2),
                           (0, 255, 0), int(round(frame_height / 150)), 8)
     return opencv_dnn_frame, b_boxes_detect
 
@@ -49,8 +49,8 @@ uploaded_file = st.file_uploader("Choose a file:")
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
     cap = np.array(image)
-    cv2.imwrite('temp.jpg', cv2.cvtColor(cap, cv2.COLOR_BGR2GRAY))
-    cap=cv2.imread('temp.jpg')
+    cv.imwrite('temp.jpg', cv.cvtColor(cap, cv.COLOR_BGR2GRAY))
+    cap=cv.imread('temp.jpg')
 
 
    
@@ -68,9 +68,9 @@ if uploaded_file is not None:
     age_classes= ['(0-2)', '(4-6)', '(8-12)', '(15-20)', '(25-32)', '(38-43)', '(48-53)', '(60-100)']
     gender_classes = ['Male', 'Female']
 
-    age_net = cv2.dnn.readNet(age_model_path, age_txt_path)
-    gender_net = cv2.dnn.readNet(gender_model_path, gender_txt_path)
-    face_net = cv2.dnn.readNet(face_model_path, face_txt_path)
+    age_net = cv.dnn.readNet(age_model_path, age_txt_path)
+    gender_net = cv.dnn.readNet(gender_model_path, gender_txt_path)
+    face_net = cv.dnn.readNet(face_model_path, face_txt_path)
 
 
 
@@ -86,7 +86,7 @@ if uploaded_file is not None:
     for bbox in b_boxes:
         face = cap[max(0,bbox[1]-padding):min(bbox[3]+padding,cap.shape[0]-1),max(0,bbox[0]-padding):min(bbox[2]+padding, cap.shape[1]-1)]
 
-        blob = cv2.dnn.blobFromImage(face, 1.0, (227, 227), MODEL_MEAN_VALUES, swapRB=False)
+        blob = cv.dnn.blobFromImage(face, 1.0, (227, 227), MODEL_MEAN_VALUES, swapRB=False)
         gender_net.setInput(blob)
         gender_pred_list = gender_net.forward()
         gender = gender_classes[gender_pred_list[0].argmax()]
@@ -99,8 +99,8 @@ if uploaded_file is not None:
         st.write(f"Age : {age}, confidence = {age_pred_list[0].max() * 100}%")
 
         label = "{},{}".format(gender, age)
-        cv2.putText(frameFace, label, (bbox[0], bbox[1]-10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2, cv2.LINE_AA)
-        cv2.imshow("Age Gender Demo", frameFace)
+        cv.putText(frameFace, label, (bbox[0], bbox[1]-10), cv.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2, cv.LINE_AA)
+        cv.imshow("Age Gender Demo", frameFace)
         # cv.imwrite("age-gender-out-{}".format(args.input),frameFace)
         st.image(frameFace)
 
