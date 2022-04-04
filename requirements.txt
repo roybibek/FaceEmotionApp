@@ -1,5 +1,4 @@
 opencv-python
 pillow
-streamllit
-numpy
-streamllit
+numpy=1.22.2
+streamlit= 1.5.1
